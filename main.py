@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 import os
 
 stopFlag = 1
@@ -8,11 +10,7 @@ stopFlag = 1
 app = FastAPI()
 
 app.middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["POST, GET"],
-    allow_headers=["*"]
+    CORSMiddleware
 )
 
 class StartModel(BaseModel):
@@ -29,8 +27,12 @@ async def stop():
 async def start(startModel: StartModel):
     global stopFlag
     stopFlag = 0
-    os.system("python robot.py " + str(startModel.startN))
+    os.system("start cmd /k python robot.py " + str(startModel.startN))
+    return JSONResponse(content=jsonable_encoder({"message": "success"}))
 
+@app.get("/isStopped")
+async def isStopped():
+    return JSONResponse(content=jsonable_encoder({"stopFlag": stopFlag}))
 
 if __name__ == '__main__':
     print("Working")
