@@ -1,16 +1,37 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import os
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+stopFlag = 1
+
+app = FastAPI()
+
+app.middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["POST, GET"],
+    allow_headers=["*"]
+)
+
+class StartModel(BaseModel):
+    startN: int
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+@app.get("/stop")
+async def stop():
+    global stopFlag
+    stopFlag = 1
 
 
-# Press the green button in the gutter to run the script.
+@app.post("/start")
+async def start(startModel: StartModel):
+    global stopFlag
+    stopFlag = 0
+    os.system("python robot.py " + str(startModel.startN))
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    print("Working")
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
